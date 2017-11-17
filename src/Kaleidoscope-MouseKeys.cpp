@@ -1,7 +1,6 @@
 #include <Arduino.h>
 
 #include "Kaleidoscope-MouseKeys.h"
-#include "MouseWrapper.h"
 #include "Kaleidoscope.h"
 
 uint8_t MouseKeys_::mouseMoveIntent;
@@ -31,12 +30,8 @@ void MouseKeys_::scrollWheel(uint8_t keyCode) {
     kaleidoscope::hid::moveMouse(0, 0, -wheelSpeed);
 }
 
-void MouseKeys_::loopHook(bool postClear) {
-  if (postClear) {
-    mouseMoveIntent = 0;
-    return;
-  }
-
+void MouseKeys_::startLoopHook()
+{
   if (mouseMoveIntent == 0) {
     MouseWrapper.accelStep = 0;
     endTime = 0;
@@ -69,32 +64,34 @@ void MouseKeys_::loopHook(bool postClear) {
   MouseWrapper.move(moveX, moveY);
 }
 
-Key MouseKeys_::eventHandlerHook(Key mappedKey, byte row, byte col, uint8_t keyState) {
+bool MouseKeys_::eventHandlerHook(Key &mappedKey, const EventKey &eventKey)
+{
   if (mappedKey.flags != (SYNTHETIC | IS_MOUSE_KEY))
-    return mappedKey;
+    return true; // Do not modify mappedKey and let other handlers 
+                 // be called afterwards.
 
   if (mappedKey.keyCode & KEY_MOUSE_BUTTON && !(mappedKey.keyCode & KEY_MOUSE_WARP)) {
     uint8_t button = mappedKey.keyCode & ~KEY_MOUSE_BUTTON;
 
-    if (keyToggledOn(keyState)) {
+    if (keyToggledOn(eventKey.keyState_)) {
       MouseWrapper.pressButton(button);
-    } else if (keyToggledOff(keyState)) {
+    } else if (keyToggledOff(eventKey.keyState_)) {
       MouseWrapper.release_button(button);
     }
   } else if (!(mappedKey.keyCode & KEY_MOUSE_WARP)) {
-    if (keyToggledOn(keyState)) {
+    if (keyToggledOn(eventKey.keyState_)) {
       endTime = millis() + speedDelay;
       accelEndTime = millis() + accelDelay;
       wheelEndTime = 0;
     }
-    if (keyIsPressed(keyState)) {
+    if (keyIsPressed(eventKey.keyState_)) {
       if (mappedKey.keyCode & KEY_MOUSE_WHEEL) {
         scrollWheel(mappedKey.keyCode);
       } else {
         mouseMoveIntent |= mappedKey.keyCode;
       }
     }
-  } else if (keyToggledOn(keyState)) {
+  } else if (keyToggledOn(eventKey.keyState_)) {
     if (mappedKey.keyCode & KEY_MOUSE_WARP && mappedKey.flags & IS_MOUSE_KEY) {
       // we don't pass in the left and up values because those are the
       // default, "no-op" conditionals
@@ -104,17 +101,15 @@ Key MouseKeys_::eventHandlerHook(Key mappedKey, byte row, byte col, uint8_t keyS
     }
   }
 
-  return Key_NoKey;
+  mappedKey = Key_NoKey; // mappedKey is passed by reference, 
+                         // so we can simply modify it.
+  
+  // Prevent call of other plugins' handlers
+  //
+  return false;
 }
 
 MouseKeys_::MouseKeys_(void) {
-}
-
-void
-MouseKeys_::begin(void) {
-  MouseWrapper.begin();
-  Kaleidoscope.useEventHandlerHook(eventHandlerHook);
-  Kaleidoscope.useLoopHook(loopHook);
 }
 
 MouseKeys_ MouseKeys;

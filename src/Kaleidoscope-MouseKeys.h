@@ -2,12 +2,11 @@
 
 #include "Kaleidoscope.h"
 #include "MouseKeyDefs.h"
+#include "MouseWrapper.h" // Moved here to allow for inlining MouseWrapper.begin()
 
 class MouseKeys_ : public KaleidoscopePlugin {
  public:
   MouseKeys_(void);
-
-  void begin(void) final;
 
   static uint8_t speed;
   static uint16_t speedDelay;
@@ -23,8 +22,18 @@ class MouseKeys_ : public KaleidoscopePlugin {
   static uint32_t wheelEndTime;
 
   static void scrollWheel(uint8_t keyCode);
-  static void loopHook(bool postClear);
-  static Key eventHandlerHook(Key mappedKey, byte row, byte col, uint8_t keyState);
+  
+  void init() {
+    MouseWrapper.begin();
+  }
+     
+  void startLoopHook();
+  
+  void endLoopHook() {
+     mouseMoveIntent = 0; // inlided to speed things up
+  }
+  
+  bool eventHandlerHook(Key &mappedKey, const EventKey &eventKey);
 };
 
 extern MouseKeys_ MouseKeys;
