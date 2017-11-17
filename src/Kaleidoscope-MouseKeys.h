@@ -7,6 +7,18 @@
 class MouseKeys_ : public KaleidoscopePlugin {
  public:
   MouseKeys_(void);
+  
+  void init() {
+    MouseWrapper.begin();
+  }
+     
+  void startLoopHook();
+  
+  void endLoopHook() {
+     mouseMoveIntent = 0; // inlided to speed things up
+  }
+  
+  bool eventHandlerHook(Key &mappedKey, const EventKey &eventKey);
 
   static uint8_t speed;
   static uint16_t speedDelay;
@@ -22,18 +34,6 @@ class MouseKeys_ : public KaleidoscopePlugin {
   static uint32_t wheelEndTime;
 
   static void scrollWheel(uint8_t keyCode);
-  
-  void init() {
-    MouseWrapper.begin();
-  }
-     
-  void startLoopHook();
-  
-  void endLoopHook() {
-     mouseMoveIntent = 0; // inlided to speed things up
-  }
-  
-  bool eventHandlerHook(Key &mappedKey, const EventKey &eventKey);
 };
 
 extern MouseKeys_ MouseKeys;
