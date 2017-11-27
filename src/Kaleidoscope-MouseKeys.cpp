@@ -30,7 +30,7 @@ void MouseKeys_::scrollWheel(uint8_t keyCode) {
     kaleidoscope::hid::moveMouse(0, 0, -wheelSpeed);
 }
 
-void MouseKeys_::startLoopHook()
+void MouseKeys_::preReportHook()
 {
   if (mouseMoveIntent == 0) {
     MouseWrapper.accelStep = 0;

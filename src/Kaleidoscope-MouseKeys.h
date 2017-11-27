@@ -12,9 +12,9 @@ class MouseKeys_ : public KaleidoscopePlugin {
     MouseWrapper.begin();
   }
      
-  void startLoopHook();
+  void preReportHook();
   
-  void endLoopHook() {
+  void postReportHook() {
      mouseMoveIntent = 0; // inlided to speed things up
   }
   
