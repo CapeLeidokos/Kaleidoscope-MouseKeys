@@ -18,7 +18,10 @@ class MouseKeys_ : public KaleidoscopePlugin {
      mouseMoveIntent = 0; // inlided to speed things up
   }
   
-  bool eventHandlerHook(Key &mappedKey, const EventKey &eventKey);
+  // Note the explicit namespace specification kaleidoscope:: can be ommited as soon
+  // as MouseKeys_ lives in a namespace below kaleidoscope.
+  //
+  bool eventHandlerHook(kaleidoscope::Key &mappedKey, const kaleidoscope::EventKey &eventKey);
 
   static uint8_t speed;
   static uint16_t speedDelay;

@@ -64,7 +64,8 @@ void MouseKeys_::preReportHook()
   MouseWrapper.move(moveX, moveY);
 }
 
-bool MouseKeys_::eventHandlerHook(Key &mappedKey, const EventKey &eventKey)
+bool MouseKeys_::eventHandlerHook(kaleidoscope::Key &mappedKey, 
+                                  const kaleidoscope::EventKey &eventKey)
 {
   if (mappedKey.flags != (SYNTHETIC | IS_MOUSE_KEY))
     return true; // Do not modify mappedKey and let other handlers 
